@@ -11,15 +11,17 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 		l := len(c.mem.dict)
 
 		var items []*Item
-		if l > gcSize {
-			items = c.Slice(l-gcSize, l)
+		left := gcSize
+
+		if l > left {
+			items = c.Slice(l-left, l)
 		} else {
 			items = c.Slice(0, l)
-			gcSize = l
+			left = l
 		}
 
 		var item *Item
-		for i := 0; i < gcSize; i++ {
+		for i := 0; i < left; i++ {
 			item = items[i]
 
 			aliveable, ok := item.value.(Aliveable)
