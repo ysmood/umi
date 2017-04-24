@@ -148,6 +148,12 @@ func (c *Cache) Slice(begin int, end int) []*Item {
 	l := end - begin
 	items := make([]*Item, l)
 
+	if !(0 <= begin &&
+		begin <= end &&
+		end <= c.Count()) {
+		panic("slice bounds out of range")
+	}
+
 	for i := 0; i < l; i++ {
 		items[i] = item
 
