@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"testing"
 
-	"time"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/umi"
 )
@@ -70,6 +68,17 @@ func TestSlice(t *testing.T) {
 	assert.Equal(t, []interface{}{4, 3}, items)
 }
 
+func TestSliceOutOfRange(t *testing.T) {
+	defer func() {
+		r := recover()
+		assert.Equal(t, "slice bounds out of range", r)
+	}()
+
+	c := umi.New(nil)
+
+	c.Slice(0, 1)
+}
+
 func TestItems(t *testing.T) {
 	c := umi.New(nil)
 
@@ -94,21 +103,6 @@ func TestPurge(t *testing.T) {
 	arr := c.Values()
 
 	assert.Equal(t, []interface{}{}, arr)
-}
-
-func TestTTL(t *testing.T) {
-	c := umi.New(&umi.Options{
-		TTL:    time.Millisecond * 20,
-		GCSpan: time.Millisecond * 10,
-	})
-
-	c.Set("ok", "test")
-
-	time.Sleep(time.Millisecond * 50)
-
-	_, has := c.Get("ok")
-
-	assert.Equal(t, false, has)
 }
 
 func TestPromoteUntilHead(t *testing.T) {
