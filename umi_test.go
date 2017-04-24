@@ -3,6 +3,11 @@ package umi_test
 import (
 	"strconv"
 	"testing"
+	"time"
+
+	"runtime"
+
+	"sync"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/umi"
@@ -148,4 +153,31 @@ func TestOverflow(t *testing.T) {
 
 	assert.Equal(t, 73, int(c.Size()))
 	assert.Equal(t, []interface{}{4}, arr)
+}
+
+func TestRace(t *testing.T) {
+	// c := umi.New(&umi.Options{
+	// 	TTL:    time.Microsecond * 5,
+	// 	GCSpan: time.Microsecond * 1,
+	// })
+
+	l := sync.Mutex{}
+
+	d := map[int]int{}
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go func() {
+			for {
+				time.Sleep(time.Nanosecond * 100)
+				noop(len(d))
+				l.Lock()
+				d[1] = 10
+				l.Unlock()
+				// c.Set("ok", "test")
+				// c.Get("ok")
+			}
+		}()
+	}
+
+	time.Sleep(time.Second * 1)
 }
