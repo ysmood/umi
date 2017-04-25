@@ -46,6 +46,10 @@ The `get` performance is 4x faster than the `https://github.com/hashicorp/golang
 The `set` is a little slower. It's because `umi`'s data struct contains extra info
 such as TTL and byte size. This trade-off for more functionalities is acceptable.
 
+`umi`'s faster performance is because it uses two read-write locks for the
+internal `map` and `linked-list`, and doesn't promote on each `get` operation, it
+promotes by chance.
+
 ```
 BenchmarkSet-8              	 2000000	       900 ns/op	     160 B/op	       4 allocs/op
 BenchmarkGet-8              	50000000	        33.5 ns/op	       0 B/op	       0 allocs/op
