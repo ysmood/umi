@@ -116,6 +116,10 @@ func (m *memCache) delTail() {
 }
 
 func (m *memCache) del(item *Item) {
+	if item == nil {
+		return
+	}
+
 	delete(m.dict, item.key)
 	m.list.del(item)
 	m.size -= item.size

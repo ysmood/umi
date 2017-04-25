@@ -1,13 +1,12 @@
 package umi_test
 
 import (
+	"math/rand"
 	"strconv"
 	"testing"
 	"time"
 
 	"runtime"
-
-	"sync"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/umi"
@@ -41,6 +40,18 @@ func TestPeek(t *testing.T) {
 	v, _ := c.Peek("a")
 
 	assert.Equal(t, 10, int(v.(int32)))
+}
+
+func TestDel(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("a", int32(10))
+
+	c.Del("a")
+
+	_, has := c.Get("a")
+
+	assert.Equal(t, false, has)
 }
 
 func TestPromote(t *testing.T) {
@@ -153,28 +164,35 @@ func TestOverflow(t *testing.T) {
 }
 
 func TestRace(t *testing.T) {
-	// c := umi.New(&umi.Options{
-	// 	TTL:    time.Microsecond * 5,
-	// 	GCSpan: time.Microsecond * 1,
-	// })
-
-	l := sync.Mutex{}
-
-	d := map[int]int{}
+	c := umi.New(&umi.Options{
+		TTL:    time.Microsecond * 5,
+		GCSpan: time.Microsecond * 1,
+	})
 
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go func() {
 			for {
-				time.Sleep(time.Nanosecond * 100)
-				noop(len(d))
-				l.Lock()
-				d[1] = 10
-				l.Unlock()
-				// c.Set("ok", "test")
-				// c.Get("ok")
+				time.Sleep(time.Nanosecond * 10)
+				r := rand.Int() % 4
+				switch r {
+				case 0:
+					c.Set("ok", "test")
+				case 1:
+					c.Get("ok")
+				case 2:
+					c.Del("ok")
+				case 3:
+					items := c.Items()
+
+					for _, item := range items {
+						if item == nil {
+							panic("shouldn't be nil")
+						}
+					}
+				}
 			}
 		}()
 	}
 
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 3)
 }

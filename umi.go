@@ -116,7 +116,7 @@ func (c *Cache) Peek(key string) (interface{}, bool) {
 // Keys ...
 func (c *Cache) Keys() []string {
 	head := c.mem.list.head
-	arr := make([]string, len(c.mem.dict))
+	arr := make([]string, c.mem.list.len)
 	i := 0
 
 	for head != nil {
@@ -131,7 +131,7 @@ func (c *Cache) Keys() []string {
 // Values ...
 func (c *Cache) Values() []interface{} {
 	head := c.mem.list.head
-	arr := make([]interface{}, len(c.mem.dict))
+	arr := make([]interface{}, c.mem.list.len)
 	i := 0
 
 	for head != nil {
@@ -168,7 +168,7 @@ func (c *Cache) Slice(begin int, end int) []*Item {
 func (c *Cache) Items() []*Item {
 	c.mem.list.RLock()
 
-	items := make([]*Item, len(c.mem.dict))
+	items := make([]*Item, c.mem.list.len)
 
 	item := c.mem.list.head
 	i := 0
