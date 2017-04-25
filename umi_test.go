@@ -1,12 +1,15 @@
 package umi_test
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
 
 	"runtime"
+
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/umi"
@@ -169,23 +172,30 @@ func TestRace(t *testing.T) {
 		GCSpan: time.Microsecond * 1,
 	})
 
+	vs := strings.Split("time.Sleep(time.Nanosecond * 10", "")
+	l := len(vs)
+
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go func() {
 			for {
 				time.Sleep(time.Nanosecond * 10)
-				r := rand.Int() % 4
-				switch r {
+				operator := rand.Int() % 4
+				k := vs[rand.Int()%l]
+				v := vs[rand.Int()%l]
+
+				switch operator {
 				case 0:
-					c.Set("ok", "test")
+					c.Set(k, v)
 				case 1:
-					c.Get("ok")
+					c.Get(k)
 				case 2:
-					c.Del("ok")
+					c.Del(k)
 				case 3:
 					items := c.Items()
 
 					for _, item := range items {
 						if item == nil {
+							fmt.Println(items)
 							panic("shouldn't be nil")
 						}
 					}
