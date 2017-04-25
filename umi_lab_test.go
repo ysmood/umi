@@ -46,8 +46,6 @@ func TestLab(t *testing.T) {
 	}
 
 	noop(res)
-
-	// fmt.Println(res)
 }
 
 func TestLabGob(t *testing.T) {
@@ -66,6 +64,4 @@ func TestLabGob(t *testing.T) {
 	dec := gob.NewDecoder(&bb)
 	var o S
 	dec.Decode(&o)
-
-	// fmt.Println(o.Content)
 }

@@ -1,6 +1,7 @@
 package umi
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -36,6 +37,7 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 				c.mem.Lock()
 				c.mem.del(item)
 				c.mem.Unlock()
+				fmt.Println("gc: " + item.key)
 			}
 		}
 
