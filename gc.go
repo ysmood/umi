@@ -37,9 +37,7 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 			}
 
 			if !alive {
-				c.mem.Lock()
-				c.mem.del(item)
-				c.mem.Unlock()
+				c.Del(item.key)
 			}
 		}
 
