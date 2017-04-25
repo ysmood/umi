@@ -28,6 +28,9 @@ type memList struct {
 
 func (l *memList) add(item *Item) {
 	l.Lock()
+
+	l.len++
+
 	if l.head == nil {
 		l.head = item
 		l.tail = l.head
@@ -40,13 +43,14 @@ func (l *memList) add(item *Item) {
 
 	l.head = l.head.prev
 
-	l.len++
-
 	l.Unlock()
 }
 
 func (l *memList) del(item *Item) {
 	l.Lock()
+
+	l.len--
+
 	// if head
 	if item.prev == nil {
 		l.head = item.next
@@ -63,8 +67,6 @@ func (l *memList) del(item *Item) {
 	}
 
 	item.prev = nil
-
-	l.len--
 
 	l.Unlock()
 }
