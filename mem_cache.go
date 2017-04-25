@@ -19,6 +19,8 @@ type memCache struct {
 type memList struct {
 	sync.RWMutex
 
+	len int
+
 	// for fast insertion & deletion
 	head *Item
 	tail *Item
@@ -37,6 +39,9 @@ func (l *memList) add(item *Item) {
 	l.head.prev = item
 
 	l.head = l.head.prev
+
+	l.len++
+
 	l.Unlock()
 }
 
@@ -58,6 +63,9 @@ func (l *memList) del(item *Item) {
 	}
 
 	item.prev = nil
+
+	l.len--
+
 	l.Unlock()
 }
 

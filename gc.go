@@ -25,6 +25,10 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 		for i := 0; i < left; i++ {
 			item = items[i]
 
+			if item == nil {
+				continue
+			}
+
 			aliveable, ok := item.value.(Aliveable)
 			var alive bool
 			if ok {

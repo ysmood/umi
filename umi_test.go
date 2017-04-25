@@ -74,14 +74,11 @@ func TestSlice(t *testing.T) {
 }
 
 func TestSliceOutOfRange(t *testing.T) {
-	defer func() {
-		r := recover()
-		assert.Equal(t, "slice bounds out of range", r)
-	}()
-
 	c := umi.New(nil)
 
-	c.Slice(0, 1)
+	items := c.Slice(0, 2)
+
+	assert.Equal(t, make([]*umi.Item, 2), items)
 }
 
 func TestItems(t *testing.T) {

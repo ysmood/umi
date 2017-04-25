@@ -42,7 +42,10 @@ func (c *Cache) Size() uint64 {
 
 // Count ...
 func (c *Cache) Count() int {
-	return len(c.mem.dict)
+	c.mem.list.RLock()
+	l := c.mem.list.len
+	c.mem.list.RUnlock()
+	return l
 }
 
 // Set the val parameter could be `umi.IItem`, which will overwrite
@@ -147,12 +150,6 @@ func (c *Cache) Slice(begin int, end int) []*Item {
 	item := c.mem.list.head
 	l := end - begin
 	items := make([]*Item, l)
-
-	if !(0 <= begin &&
-		begin <= end &&
-		end <= c.Count()) {
-		panic("slice bounds out of range")
-	}
 
 	for i := 0; i < l; i++ {
 		items[i] = item
