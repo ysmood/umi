@@ -10,7 +10,7 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 
 		c.mem.Lock()
 
-		l := len(c.mem.dict)
+		l := c.mem.list.len
 
 		var items []*Item
 		left := gcSize
