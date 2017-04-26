@@ -111,36 +111,6 @@ func (l *memList) promote(item *Item, now int64) {
 	l.Unlock()
 }
 
-func (m *memCache) delTail() {
-	m.del(m.list.tail)
-}
-
-func (m *memCache) del(item *Item) {
-	if item == nil {
-		return
-	}
-
-	delete(m.dict, item.key)
-	m.list.del(item)
-	m.size -= item.size
-}
-
-// free multiple items until the freed size reaches the specified size
-func (m *memCache) free(size uintptr) bool {
-	var freedSize uintptr
-
-	for freedSize < size {
-		if m.list.tail == nil {
-			// if after all items are freed, the space is still not enough
-			return false
-		}
-		freedSize += m.list.tail.size
-		m.delTail()
-	}
-
-	return true
-}
-
 func (m *memCache) set(key string, val interface{}, now int64) *Item {
 	item, has := m.dict[key]
 
@@ -168,4 +138,38 @@ func (m *memCache) set(key string, val interface{}, now int64) *Item {
 	m.size += item.size
 
 	return item
+}
+
+func (m *memCache) del(item *Item) {
+	if item == nil {
+		return
+	}
+
+	_, has := m.dict[item.key]
+
+	if has {
+		delete(m.dict, item.key)
+		m.list.del(item)
+		m.size -= item.size
+	}
+}
+
+func (m *memCache) delTail() {
+	m.del(m.list.tail)
+}
+
+// free multiple items until the freed size reaches the specified size
+func (m *memCache) free(size uintptr) bool {
+	var freedSize uintptr
+
+	for freedSize < size {
+		if m.list.tail == nil {
+			// if after all items are freed, the space is still not enough
+			return false
+		}
+		freedSize += m.list.tail.size
+		m.delTail()
+	}
+
+	return true
 }
