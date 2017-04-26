@@ -55,7 +55,7 @@ func (list *memList) del(item *Item) {
 	if item.prev == nil {
 		list.head = item.next
 	} else {
-		item.prev.next = nil
+		item.prev.next = item.next
 	}
 
 	// if tail
@@ -63,9 +63,9 @@ func (list *memList) del(item *Item) {
 		list.tail = item.prev
 	} else {
 		item.next.prev = item.prev
-		item.next = nil
 	}
 
+	item.next = nil
 	item.prev = nil
 
 	list.Unlock()

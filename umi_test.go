@@ -25,6 +25,16 @@ func mapValues(items []*umi.Item) []interface{} {
 	return arr
 }
 
+func TestSet(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("a", 1)
+	c.Set("b", 2)
+	c.Set("c", 3)
+
+	assert.Equal(t, []interface{}{1, 2, 3}, c.Values())
+}
+
 func TestBasic(t *testing.T) {
 	c := umi.New(nil)
 
@@ -45,16 +55,46 @@ func TestPeek(t *testing.T) {
 	assert.Equal(t, 10, int(v.(int32)))
 }
 
-func TestDel(t *testing.T) {
+func TestDelHead(t *testing.T) {
 	c := umi.New(nil)
 
-	c.Set("a", int32(10))
+	c.Set("a", 1)
+	c.Set("b", 2)
+	c.Set("c", 3)
+
+	c.Del("c")
+
+	values := c.Values()
+
+	assert.Equal(t, []interface{}{2, 1}, values)
+}
+
+func TestDelMiddle(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("a", 1)
+	c.Set("b", 2)
+	c.Set("c", 3)
+
+	c.Del("b")
+
+	values := c.Values()
+
+	assert.Equal(t, []interface{}{3, 1}, values)
+}
+
+func TestDelTail(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("a", 1)
+	c.Set("b", 2)
+	c.Set("c", 3)
 
 	c.Del("a")
 
-	_, has := c.Get("a")
+	values := c.Values()
 
-	assert.Equal(t, false, has)
+	assert.Equal(t, []interface{}{3, 2}, values)
 }
 
 func TestPromote(t *testing.T) {
