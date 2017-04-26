@@ -219,18 +219,24 @@ func TestRace(t *testing.T) {
 		go func() {
 			for {
 				time.Sleep(time.Nanosecond * 10)
-				operator := rand.Int() % 4
+				operator := rand.Int() % 7
 				k := vs[rand.Int()%l]
 				v := vs[rand.Int()%l]
 
 				switch operator {
 				case 0:
-					c.Set(k, v)
+					fallthrough
 				case 1:
-					c.Get(k)
+					c.Set(k, v)
 				case 2:
-					c.Del(k)
+					fallthrough
 				case 3:
+					fallthrough
+				case 4:
+					c.Get(k)
+				case 5:
+					c.Del(k)
+				case 6:
 					items := c.Items()
 
 					for _, item := range items {
