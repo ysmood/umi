@@ -32,7 +32,7 @@ func TestSet(t *testing.T) {
 	c.Set("b", 2)
 	c.Set("c", 3)
 
-	assert.Equal(t, []interface{}{1, 2, 3}, c.Values())
+	assert.Equal(t, []interface{}{3, 2, 1}, c.Values())
 }
 
 func TestBasic(t *testing.T) {
@@ -226,10 +226,10 @@ func TestRace(t *testing.T) {
 				switch operator {
 				case 0:
 					c.Set(k, v)
-				// case 1:
-				// 	c.Get(k)
-				// case 2:
-				// 	c.Del(k)
+				case 1:
+					c.Get(k)
+				case 2:
+					c.Del(k)
 				case 3:
 					items := c.Items()
 
