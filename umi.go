@@ -96,7 +96,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	return nil, has
 }
 
-// Peek ...
+// Peek it wont' affect the promotion
 func (c *Cache) Peek(key string) (interface{}, bool) {
 	c.mem.RLock()
 
@@ -111,7 +111,7 @@ func (c *Cache) Peek(key string) (interface{}, bool) {
 	return nil, has
 }
 
-// Keys ...
+// Keys all keys from head to tail
 func (c *Cache) Keys() []string {
 	head := c.mem.list.head
 	arr := make([]string, c.mem.list.len)
@@ -126,7 +126,7 @@ func (c *Cache) Keys() []string {
 	return arr
 }
 
-// Values ...
+// Values all values from head to tail
 func (c *Cache) Values() []interface{} {
 	head := c.mem.list.head
 	arr := make([]interface{}, c.mem.list.len)
@@ -162,7 +162,7 @@ func (c *Cache) Slice(begin int, end int) []*Item {
 	return items
 }
 
-// Items return all items
+// Items all items from head to tail
 func (c *Cache) Items() []*Item {
 	c.mem.list.RLock()
 
