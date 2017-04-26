@@ -51,10 +51,8 @@ func (c *Cache) Count() int {
 // Set the val parameter could be `umi.IItem`, which will overwrite
 // the default behavior.
 func (c *Cache) Set(key string, val interface{}) *Item {
-	item := newItem(key, c.now, val)
-
 	c.mem.Lock()
-	c.mem.set(key, item)
+	item := c.mem.set(key, val, c.now)
 	c.mem.Unlock()
 
 	return item

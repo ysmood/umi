@@ -172,7 +172,7 @@ func TestRace(t *testing.T) {
 		GCSpan: time.Microsecond * 1,
 	})
 
-	vs := strings.Split("time.Sleep(time.Nanosecond * 10", "")
+	vs := strings.Split("花に嵐のたとえもあるさ さよならだけが人生", "")
 	l := len(vs)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
@@ -186,10 +186,10 @@ func TestRace(t *testing.T) {
 				switch operator {
 				case 0:
 					c.Set(k, v)
-				case 1:
-					c.Get(k)
-				case 2:
-					c.Del(k)
+				// case 1:
+				// 	c.Get(k)
+				// case 2:
+				// 	c.Del(k)
 				case 3:
 					items := c.Items()
 

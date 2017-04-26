@@ -141,24 +141,31 @@ func (m *memCache) free(size uintptr) bool {
 	return true
 }
 
-func (m *memCache) set(key string, item *Item) {
-	size := m.size + item.size
-
-	if size > m.maxSize {
-		if !m.free(size - m.maxSize) {
-			return
-		}
-	}
-
-	oldItem, has := m.dict[key]
+func (m *memCache) set(key string, val interface{}, now int64) *Item {
+	item, has := m.dict[key]
 
 	// if the content already exists, replace it with the new one
 	if has {
-		m.del(oldItem)
+		item.value = val
+		m.list.promote(item, now)
+	} else {
+		item = &Item{
+			key:   key,
+			value: val,
+			time:  now,
+		}
+
+		m.list.add(item)
+		m.dict[key] = item
 	}
-	m.list.add(item)
 
-	m.dict[key] = item
-
+	size := m.size + item.size
+	if size > m.maxSize {
+		if !m.free(size - m.maxSize) {
+			return nil
+		}
+	}
 	m.size += item.size
+
+	return item
 }
