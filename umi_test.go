@@ -260,7 +260,7 @@ func TestRace(t *testing.T) {
 		go func() {
 			for {
 				time.Sleep(time.Nanosecond * 10)
-				operator := rand.Int() % 7
+				operator := rand.Int() % 8
 				k := vs[rand.Int()%l]
 				v := vs[rand.Int()%l]
 
@@ -286,6 +286,8 @@ func TestRace(t *testing.T) {
 							panic("shouldn't be nil")
 						}
 					}
+				case 7:
+					c.Purge()
 				}
 			}
 		}()

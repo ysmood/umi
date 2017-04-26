@@ -42,10 +42,7 @@ func (c *Cache) Size() uint64 {
 
 // Count ...
 func (c *Cache) Count() int {
-	c.mem.list.RLock()
-	l := c.mem.list.len
-	c.mem.list.RUnlock()
-	return l
+	return c.mem.list.len
 }
 
 // Set the val parameter could be `umi.IItem`, which will overwrite
@@ -67,9 +64,9 @@ func (c *Cache) Del(key string) {
 
 // Purge ...
 func (c *Cache) Purge() {
-	for k := range c.mem.dict {
-		c.Del(k)
-	}
+	c.mem.Lock()
+	c.mem.purge()
+	c.mem.Unlock()
 }
 
 // Get ...

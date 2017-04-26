@@ -150,6 +150,12 @@ func (mem *memCache) delTail() {
 	mem.del(mem.list.tail)
 }
 
+func (mem *memCache) purge() {
+	for _, v := range mem.dict {
+		mem.del(v)
+	}
+}
+
 // free multiple items until the freed size reaches the specified size
 func (mem *memCache) free(size uintptr) bool {
 	var freedSize uintptr
