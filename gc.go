@@ -10,26 +10,7 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 
 		c.mem.Lock()
 
-		l := c.mem.list.len
-
-		var items []*Item
-		left := gcSize
-
-		if l > left {
-			items = c.Slice(l-left, l)
-		} else {
-			items = c.Slice(0, l)
-			left = l
-		}
-
-		var item *Item
-		for i := 0; i < left; i++ {
-			item = items[i]
-
-			if item == nil {
-				continue
-			}
-
+		for item, count := c.mem.list.tail, 0; item != nil && count < gcSize; count++ {
 			aliveable, ok := item.value.(Aliveable)
 			var alive bool
 			if ok {
@@ -38,9 +19,13 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 				alive = (c.now - item.time) < int64(ttl)
 			}
 
-			if !alive {
-				c.mem.del(item)
+			if alive {
+				break
 			}
+
+			c.mem.del(item)
+
+			item = item.prev
 		}
 
 		c.mem.Unlock()
