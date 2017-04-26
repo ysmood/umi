@@ -1,3 +1,11 @@
+# Umi 海
+
+[![Build Status](https://travis-ci.org/ysmood/umi.svg)](https://travis-ci.org/ysmood/umi)
+
+Umi is a high performance lightweight memory-disk combined cache lib.
+
+## Road Map
+
 - [x] Thread safe
 
 - [x] All the basic operations' complexity should be O(1).
