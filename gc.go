@@ -8,6 +8,8 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 	for {
 		time.Sleep(span)
 
+		c.mem.Lock()
+
 		l := len(c.mem.dict)
 
 		var items []*Item
@@ -37,9 +39,11 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 			}
 
 			if !alive {
-				c.Del(item.key)
+				c.mem.del(item)
 			}
 		}
+
+		c.mem.Unlock()
 
 		c.now = time.Now().UnixNano()
 	}

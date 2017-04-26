@@ -26,41 +26,41 @@ type memList struct {
 	tail *Item
 }
 
-func (l *memList) add(item *Item) {
-	l.Lock()
+func (list *memList) add(item *Item) {
+	list.Lock()
 
-	l.len++
+	list.len++
 
-	if l.head == nil {
-		l.head = item
-		l.tail = l.head
-		l.Unlock()
+	if list.head == nil {
+		list.head = item
+		list.tail = list.head
+		list.Unlock()
 		return
 	}
 
-	item.next = l.head
-	l.head.prev = item
+	item.next = list.head
+	list.head.prev = item
 
-	l.head = l.head.prev
+	list.head = list.head.prev
 
-	l.Unlock()
+	list.Unlock()
 }
 
-func (l *memList) del(item *Item) {
-	l.Lock()
+func (list *memList) del(item *Item) {
+	list.Lock()
 
-	l.len--
+	list.len--
 
 	// if head
 	if item.prev == nil {
-		l.head = item.next
+		list.head = item.next
 	} else {
 		item.prev.next = nil
 	}
 
 	// if tail
 	if item.next == nil {
-		l.tail = item.prev
+		list.tail = item.prev
 	} else {
 		item.next.prev = item.prev
 		item.next = nil
@@ -68,7 +68,7 @@ func (l *memList) del(item *Item) {
 
 	item.prev = nil
 
-	l.Unlock()
+	list.Unlock()
 }
 
 /*
@@ -77,14 +77,14 @@ func (l *memList) del(item *Item) {
 	convert to
 	a -> c -> b -> d
 */
-func (l *memList) promote(item *Item, now int64) {
-	l.Lock()
+func (list *memList) promote(item *Item, now int64) {
+	list.Lock()
 
 	c := item
 
 	b := c.prev
 	if b == nil {
-		l.Unlock()
+		list.Unlock()
 		return
 	}
 
@@ -92,7 +92,7 @@ func (l *memList) promote(item *Item, now int64) {
 	d := c.next
 
 	if a == nil {
-		l.head = c
+		list.head = c
 	} else {
 		a.next = c
 	}
@@ -101,23 +101,23 @@ func (l *memList) promote(item *Item, now int64) {
 	b.prev = c
 	b.next = d
 	if d == nil {
-		l.tail = b
+		list.tail = b
 	} else {
 		d.prev = b
 	}
 
 	item.time = now
 
-	l.Unlock()
+	list.Unlock()
 }
 
-func (m *memCache) set(key string, val interface{}, now int64) *Item {
-	item, has := m.dict[key]
+func (mem *memCache) set(key string, val interface{}, now int64) *Item {
+	item, has := mem.dict[key]
 
 	// if the content already exists, replace it with the new one
 	if has {
 		item.value = val
-		m.list.promote(item, now)
+		mem.list.promote(item, now)
 	} else {
 		item = &Item{
 			key:   key,
@@ -125,50 +125,46 @@ func (m *memCache) set(key string, val interface{}, now int64) *Item {
 			time:  now,
 		}
 
-		m.list.add(item)
-		m.dict[key] = item
+		mem.list.add(item)
+		mem.dict[key] = item
 	}
 
-	size := m.size + item.size
-	if size > m.maxSize {
-		if !m.free(size - m.maxSize) {
+	size := mem.size + item.size
+	if size > mem.maxSize {
+		if !mem.free(size - mem.maxSize) {
 			return nil
 		}
 	}
-	m.size += item.size
+	mem.size += item.size
 
 	return item
 }
 
-func (m *memCache) del(item *Item) {
+func (mem *memCache) del(item *Item) {
 	if item == nil {
 		return
 	}
 
-	_, has := m.dict[item.key]
-
-	if has {
-		delete(m.dict, item.key)
-		m.list.del(item)
-		m.size -= item.size
-	}
+	delete(mem.dict, item.key)
+	mem.list.del(item)
+	mem.size -= item.size
 }
 
-func (m *memCache) delTail() {
-	m.del(m.list.tail)
+func (mem *memCache) delTail() {
+	mem.del(mem.list.tail)
 }
 
 // free multiple items until the freed size reaches the specified size
-func (m *memCache) free(size uintptr) bool {
+func (mem *memCache) free(size uintptr) bool {
 	var freedSize uintptr
 
 	for freedSize < size {
-		if m.list.tail == nil {
+		if mem.list.tail == nil {
 			// if after all items are freed, the space is still not enough
 			return false
 		}
-		freedSize += m.list.tail.size
-		m.delTail()
+		freedSize += mem.list.tail.size
+		mem.delTail()
 	}
 
 	return true
