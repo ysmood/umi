@@ -115,6 +115,47 @@ func TestPromote(t *testing.T) {
 	assert.Equal(t, []interface{}{9, 7, 8, 4, 6, 5, 2, 3, 1, 0}, arr)
 }
 
+func TestPromoteHead(t *testing.T) {
+	c := umi.New(&umi.Options{
+		PromoteRate: -1,
+	})
+
+	for i := 0; i < 5; i++ {
+		c.Set(strconv.FormatInt(int64(i), 10), i)
+	}
+
+	c.Get("4")
+
+	arr := c.Values()
+	assert.Equal(t, []interface{}{4, 3, 2, 1, 0}, arr)
+}
+
+func TestPromoteTail(t *testing.T) {
+	c := umi.New(&umi.Options{
+		PromoteRate: -1,
+	})
+
+	for i := 0; i < 5; i++ {
+		c.Set(strconv.FormatInt(int64(i), 10), i)
+	}
+
+	c.Get("0")
+
+	arr := c.Values()
+	assert.Equal(t, []interface{}{4, 3, 2, 0, 1}, arr)
+}
+
+func TestPromoteEmpty(t *testing.T) {
+	c := umi.New(&umi.Options{
+		PromoteRate: -1,
+	})
+
+	c.Get("0")
+
+	arr := c.Values()
+	assert.Equal(t, []interface{}{}, arr)
+}
+
 func TestSlice(t *testing.T) {
 	c := umi.New(nil)
 

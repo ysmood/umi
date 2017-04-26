@@ -113,6 +113,8 @@ func (c *Cache) Peek(key string) (interface{}, bool) {
 
 // Keys all keys from head to tail
 func (c *Cache) Keys() []string {
+	c.mem.list.RLock()
+
 	head := c.mem.list.head
 	arr := make([]string, c.mem.list.len)
 	i := 0
@@ -123,11 +125,15 @@ func (c *Cache) Keys() []string {
 		head = head.next
 	}
 
+	c.mem.list.RUnlock()
+
 	return arr
 }
 
 // Values all values from head to tail
 func (c *Cache) Values() []interface{} {
+	c.mem.list.RLock()
+
 	head := c.mem.list.head
 	arr := make([]interface{}, c.mem.list.len)
 	i := 0
@@ -137,6 +143,8 @@ func (c *Cache) Values() []interface{} {
 		i++
 		head = head.next
 	}
+
+	c.mem.list.RUnlock()
 
 	return arr
 }

@@ -33,7 +33,7 @@ func (list *memList) add(item *Item) {
 
 	if list.head == nil {
 		list.head = item
-		list.tail = list.head
+		list.tail = item
 		list.Unlock()
 		return
 	}
@@ -41,7 +41,7 @@ func (list *memList) add(item *Item) {
 	item.next = list.head
 	list.head.prev = item
 
-	list.head = list.head.prev
+	list.head = item
 
 	list.Unlock()
 }
