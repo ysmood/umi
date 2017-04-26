@@ -26,7 +26,7 @@ type Item struct {
 	prev  *Item
 }
 
-func newItem(key string, time int64, value interface{}) *Item {
+func newItem(key string, value interface{}, time int64) *Item {
 	sizable, ok := value.(Sizable)
 
 	var size uintptr

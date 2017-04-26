@@ -119,11 +119,7 @@ func (mem *memCache) set(key string, val interface{}, now int64) *Item {
 		item.value = val
 		mem.list.promote(item, now)
 	} else {
-		item = &Item{
-			key:   key,
-			value: val,
-			time:  now,
-		}
+		item = newItem(key, val, now)
 
 		mem.list.add(item)
 		mem.dict[key] = item
