@@ -4,6 +4,9 @@
 
 Umi is a high performance lightweight memory-disk combined cache lib.
 
+Every day Umi will handle nearly 1 billion request on our server.
+We use only 6 virtual machines with 4 2.4GHz cores.
+
 ## Road Map
 
 - [x] Thread safe
@@ -18,7 +21,7 @@ Umi is a high performance lightweight memory-disk combined cache lib.
 
 - [x] With a rate to throw away promotions.
 
-- [ ] The caches are grouped into two types: memory cache and file cache. Works like swap,
+- [ ] When memory is draining. The caches are grouped into two types: memory cache and file cache. Works like swap,
   but in a much more efficient way
 
 # Quick Start
@@ -51,20 +54,32 @@ fmt.Println(v, memorySize)
 `go test -bench . -benchmem`
 
 The `get` performance is 4x faster than the `https://github.com/hashicorp/golang-lru`.
-The `set` is a little slower. It's because `umi`'s data struct contains extra info
+The `set` is a little slower. It's because Umi's data struct contains extra info
 such as TTL and byte size. This trade-off for more functionalities is acceptable.
 
-`umi`'s faster performance is because it uses two read-write locks for the
-internal `map` and `linked-list`, and doesn't promote on each `get` operation, it
-promotes by chance.
+Umi's faster performance is because it uses two read-write locks for the
+internal `map` and `linked-list`, the more atomic lock time make the total lock time smaller.
+Besides, Umi doesn't promote on each `get` operation, it promotes by chance.
+
+How umi optimizes locks:
 
 ```
-BenchmarkSet-8              	 2000000	       900 ns/op	     160 B/op	       4 allocs/op
-BenchmarkGet-8              	50000000	        33.5 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPeek-8             	50000000	        26.5 ns/op	       0 B/op	       0 allocs/op
-BenchmarkGetRate0-8         	30000000	        46.8 ns/op	       0 B/op	       0 allocs/op
-BenchmarkGetRate10000-8     	50000000	        33.1 ns/op	       0 B/op	       0 allocs/op
-BenchmarkSet_golang_lru-8   	 3000000	       653 ns/op	     105 B/op	       4 allocs/op
-BenchmarkGet_golang_lru-8   	10000000	       133 ns/op	       0 B/op	       0 allocs/op
+       umi: | ops1 | map-lock | ops2 | list-lock | ops3 |
+
+golang_lru: | -------------- write-lock --------------- |
+
+      time: ----------------------------------------------->
+```
+
+```
+BenchmarkSet-8                   	 1000000	      1080 ns/op	     260 B/op	       4 allocs/op
+BenchmarkGet-8                   	30000000	        34.4 ns/op	       1 B/op	       0 allocs/op
+BenchmarkPeek-8                  	50000000	        26.8 ns/op	       1 B/op	       0 allocs/op
+BenchmarkGetRate0-8              	20000000	        66.4 ns/op	       3 B/op	       0 allocs/op
+BenchmarkGetRate10000-8          	50000000	        36.0 ns/op	       1 B/op	       0 allocs/op
+BenchmarkSet_golang_lru-8        	 2000000	       774 ns/op	     137 B/op	       4 allocs/op
+BenchmarkGet_golang_lru-8        	10000000	       158 ns/op	       7 B/op	       0 allocs/op
+BenchmarkParallel-8              	20000000	        76.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkParallel_golang_lru-8   	 5000000	       230 ns/op	       9 B/op	       0 allocs/op
 ```
 

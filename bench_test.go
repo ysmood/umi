@@ -109,3 +109,35 @@ func BenchmarkGet_golang_lru(b *testing.B) {
 		c.Get(key)
 	}
 }
+
+func BenchmarkParallel(b *testing.B) {
+	c := umi.New(nil)
+
+	i := 0
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if i%10000 == 0 {
+				c.Set("a", i)
+			} else {
+				c.Get("a")
+			}
+			i++
+		}
+	})
+}
+
+func BenchmarkParallel_golang_lru(b *testing.B) {
+	c, _ := golang_lru.New(1000)
+
+	i := 0
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if i%10000 == 0 {
+				c.Add("a", i)
+			} else {
+				c.Get("a")
+			}
+			i++
+		}
+	})
+}
