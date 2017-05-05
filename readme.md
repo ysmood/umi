@@ -4,8 +4,9 @@
 
 Umi is a high performance lightweight memory-disk combined cache lib.
 
-Every day Umi will handle nearly 1 billion request on our server.
-We use only 6 virtual machines with 4 2.4GHz cores.
+Different from other libs, Umi will automatically calculate the memory size
+of random data structure for you, and limit the number of items by the total bytes of them,
+not just the count of them.
 
 ## Road Map
 
@@ -21,7 +22,7 @@ We use only 6 virtual machines with 4 2.4GHz cores.
 
 - [x] With a rate to throw away promotions.
 
-- [ ] When memory is draining. The caches are grouped into two types: memory cache and file cache. Works like swap,
+- [ ] When memory is draining. The cache will be queued into a disk based LRU. Works like swap,
   but in a much more efficient way
 
 # Quick Start
@@ -47,6 +48,14 @@ memorySize := c.Size()
 
 fmt.Println(v, memorySize)
 ```
+
+# FAQ
+
+- Is the auto-calculated byte size of item safe?
+
+  I will try my best to make it close to the real size, but because of the GC nature of
+  golang, the safety is not guaranteed. So in case you have a more precise way to calculate
+  the size, you can implement the `Sizable` interface of each item.
 
 
 # Benchmark
