@@ -64,7 +64,7 @@ fmt.Println(v, memorySize)
 
 The `get` performance is 4x faster than the `https://github.com/hashicorp/golang-lru`.
 The `set` is a little slower. It's because Umi's data struct contains extra info
-such as TTL and byte size. This trade-off for more functionalities is acceptable.
+to calculate such as TTL and byte size. This trade-off for more functionalities is acceptable.
 
 Umi's faster performance is because it uses two read-write locks for the
 internal `map` and `linked-list`, the more atomic lock time make the total lock time smaller.
