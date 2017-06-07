@@ -8,9 +8,11 @@ type Options struct {
 	MaxMemSize uint64
 
 	// default 1sec, GC every 1sec
+	// if less than zero, gc will be disabled
 	GCSpan time.Duration
 
 	// default 10, each GC round check 10 items from the tail
+	// if less than zero, gc will be disabled
 	GCSize int
 
 	// default 1min

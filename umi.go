@@ -30,7 +30,9 @@ func New(opts *Options) *Cache {
 		},
 	}
 
-	go c.gcWorker(opts.GCSpan, opts.GCSize, opts.TTL)
+	if opts.GCSpan > 0 && opts.GCSize > 0 {
+		go c.gcWorker(opts.GCSpan, opts.GCSize, opts.TTL)
+	}
 
 	return c
 }
