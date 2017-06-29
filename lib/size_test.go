@@ -61,19 +61,11 @@ func TestComplexStruct(t *testing.T) {
 }
 
 func TestStructWithPrivateProp(t *testing.T) {
-	defer func() {
-		r := recover()
-
-		if r == nil {
-			panic("should panic")
-		}
-	}()
-
-	// the size of private fields can't be auto calculated
 	item := struct {
 		a int32
 	}{}
 
+	// should not panic
 	lib.Size(item)
 }
 

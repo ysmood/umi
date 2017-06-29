@@ -32,7 +32,10 @@ func Size(v interface{}) uintptr {
 		val := reflect.ValueOf(v)
 		l := val.Len()
 		for i := 0; i < l; i++ {
-			s += Size(val.Index(i).Interface())
+			v := val.Index(i)
+			if v.IsValid() && v.CanInterface() {
+				s += Size(v.Interface())
+			}
 		}
 
 	// TODO: The size of the hash map should also contains the hash keys and collision linked lists,
@@ -43,8 +46,13 @@ func Size(v interface{}) uintptr {
 		keys := val.MapKeys()
 
 		for _, i := range keys {
-			s += Size(i.Interface())
-			s += Size(val.MapIndex(i).Interface())
+			if i.IsValid() && i.CanInterface() {
+				s += Size(i.Interface())
+			}
+			v := val.MapIndex(i)
+			if v.IsValid() && v.CanInterface() {
+				s += Size(v.Interface())
+			}
 		}
 
 	case reflect.String:
@@ -59,13 +67,18 @@ func Size(v interface{}) uintptr {
 
 		for i := 0; i < l; i++ {
 			field := val.Field(i)
-			s += Size(field.Interface())
+			if field.IsValid() && field.CanInterface() {
+				s += Size(field.Interface())
+			}
 		}
 
 	case reflect.Ptr:
 		s += t.Size()
 		val := reflect.ValueOf(v)
-		s += Size(val.Elem().Interface())
+		v := val.Elem()
+		if v.IsValid() && v.CanInterface() {
+			s += Size(v.Interface())
+		}
 
 	case reflect.Interface:
 		s += t.Size()
