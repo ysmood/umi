@@ -58,3 +58,8 @@ func (item *Item) Value() interface{} {
 func (item *Item) Time() int64 {
 	return item.time
 }
+
+// Size ...
+func (item *Item) Size() uint64 {
+	return uint64(item.size)
+}
