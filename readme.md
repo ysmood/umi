@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ysmood/umi.svg)](https://travis-ci.org/ysmood/umi)
 
-Umi is a high performance lightweight memory-disk combined cache lib.
+Umi is a high performance LRU cache lib.
 
 Different from other libs, Umi will automatically calculate the memory size
 of random data structure for you, and limit the number of items by the total bytes of them,
@@ -21,9 +21,6 @@ not just the count of them.
 - [x] The algorithm used to replace cache is a variation of LRU.
 
 - [x] With a rate to throw away promotions.
-
-- [ ] When memory is draining. The cache will be queued into a disk based LRU. Works like swap,
-  but in a much more efficient way
 
 # Quick Start
 
