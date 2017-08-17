@@ -1,7 +1,7 @@
 package umi
 
 import (
-	"github.com/ysmood/umi/lib"
+	"github.com/ysmood/gosize"
 )
 
 const itemBaseSize = 8 + 16 + 8 + 8 + 8
@@ -57,9 +57,9 @@ func (item *Item) updateSize() {
 
 	var size uintptr
 	if ok {
-		size = itemBaseSize + lib.Size(item.key) + sizable.Size()
+		size = itemBaseSize + gosize.Size(item.key) + sizable.Size()
 	} else {
-		size = itemBaseSize + lib.Size(item.key) + lib.Size(item.value)
+		size = itemBaseSize + gosize.Size(item.key) + gosize.Size(item.value)
 	}
 	item.size = size
 }

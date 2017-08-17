@@ -7,8 +7,7 @@ import (
 
 // Cache ...
 type Cache struct {
-	mem  *memCache
-	disk *diskCache
+	mem *memCache
 
 	promoteCountBase int32
 	promoteCount     int32
