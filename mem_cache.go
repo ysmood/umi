@@ -117,6 +117,8 @@ func (mem *memCache) set(key string, val interface{}, now int64) *Item {
 	// if the content already exists, replace it with the new one
 	if has {
 		item.value = val
+		mem.size -= item.size
+		item.updateSize()
 		mem.list.promote(item, now)
 	} else {
 		item = newItem(key, val, now)
@@ -125,13 +127,12 @@ func (mem *memCache) set(key string, val interface{}, now int64) *Item {
 		mem.dict[key] = item
 	}
 
-	size := mem.size + item.size
-	if size > mem.maxSize {
-		if !mem.free(size - mem.maxSize) {
+	mem.size += item.size
+	if mem.size > mem.maxSize {
+		if !mem.free(mem.size - mem.maxSize) {
 			return nil
 		}
 	}
-	mem.size += item.size
 
 	return item
 }

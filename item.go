@@ -26,22 +26,14 @@ type Item struct {
 	prev  *Item
 }
 
-func newItem(key string, value interface{}, time int64) *Item {
-	sizable, ok := value.(Sizable)
-
-	var size uintptr
-	if ok {
-		size = itemBaseSize + lib.Size(key) + sizable.Size()
-	} else {
-		size = itemBaseSize + lib.Size(key) + lib.Size(value)
-	}
-
-	return &Item{
+func newItem(key string, value interface{}, time int64) (item *Item) {
+	item = &Item{
 		value: value,
-		size:  size,
 		time:  time,
 		key:   key,
 	}
+	item.updateSize()
+	return
 }
 
 // Key ...
@@ -57,6 +49,19 @@ func (item *Item) Value() interface{} {
 // Time ...
 func (item *Item) Time() int64 {
 	return item.time
+}
+
+// updateSize ...
+func (item *Item) updateSize() {
+	sizable, ok := item.value.(Sizable)
+
+	var size uintptr
+	if ok {
+		size = itemBaseSize + lib.Size(item.key) + sizable.Size()
+	} else {
+		size = itemBaseSize + lib.Size(item.key) + lib.Size(item.value)
+	}
+	item.size = size
 }
 
 // Size ...

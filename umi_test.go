@@ -200,6 +200,7 @@ func TestPurge(t *testing.T) {
 	arr := c.Values()
 
 	assert.Equal(t, []interface{}{}, arr)
+	assert.Equal(t, uint64(0), c.Size())
 }
 
 func TestPromoteUntilHead(t *testing.T) {
@@ -229,6 +230,25 @@ func TestSize(t *testing.T) {
 	c.Set("3", 3)
 
 	assert.Equal(t, 219, int(c.Size()))
+}
+
+func TestUpdateSize(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("1", "a")
+	c.Set("1", "ab")
+
+	assert.Equal(t, 83, int(c.Size()))
+}
+
+func TestReduceSize(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("1", "a")
+	c.Set("2", "b")
+	c.Del("2")
+
+	assert.Equal(t, 82, int(c.Size()))
 }
 
 func TestOverflow(t *testing.T) {
