@@ -17,10 +17,6 @@ type Options struct {
 
 	// default 1min
 	TTL time.Duration
-
-	// default 100, promote after 100 hits,
-	// if it is less than zero, will promote on each hit
-	PromoteRate int32
 }
 
 func defaultOptions(opts *Options) *Options {
@@ -39,9 +35,6 @@ func defaultOptions(opts *Options) *Options {
 	}
 	if opts.TTL == 0 {
 		opts.TTL = time.Minute
-	}
-	if opts.PromoteRate == 0 {
-		opts.PromoteRate = 100
 	}
 
 	return opts

@@ -97,65 +97,6 @@ func TestDelTail(t *testing.T) {
 	assert.Equal(t, []interface{}{3, 2}, values)
 }
 
-func TestPromote(t *testing.T) {
-	c := umi.New(&umi.Options{
-		PromoteRate: -1,
-	})
-
-	for i := int64(0); i < 10; i++ {
-		c.Set(strconv.FormatInt(i, 10), int(i))
-	}
-
-	c.Get("2")
-	c.Get("7")
-	c.Get("4")
-	c.Get("4")
-
-	arr := c.Values()
-	assert.Equal(t, []interface{}{9, 7, 8, 4, 6, 5, 2, 3, 1, 0}, arr)
-}
-
-func TestPromoteHead(t *testing.T) {
-	c := umi.New(&umi.Options{
-		PromoteRate: -1,
-	})
-
-	for i := 0; i < 5; i++ {
-		c.Set(strconv.FormatInt(int64(i), 10), i)
-	}
-
-	c.Get("4")
-
-	arr := c.Values()
-	assert.Equal(t, []interface{}{4, 3, 2, 1, 0}, arr)
-}
-
-func TestPromoteTail(t *testing.T) {
-	c := umi.New(&umi.Options{
-		PromoteRate: -1,
-	})
-
-	for i := 0; i < 5; i++ {
-		c.Set(strconv.FormatInt(int64(i), 10), i)
-	}
-
-	c.Get("0")
-
-	arr := c.Values()
-	assert.Equal(t, []interface{}{4, 3, 2, 0, 1}, arr)
-}
-
-func TestPromoteEmpty(t *testing.T) {
-	c := umi.New(&umi.Options{
-		PromoteRate: -1,
-	})
-
-	c.Get("0")
-
-	arr := c.Values()
-	assert.Equal(t, []interface{}{}, arr)
-}
-
 func TestSlice(t *testing.T) {
 	c := umi.New(nil)
 
@@ -201,25 +142,6 @@ func TestPurge(t *testing.T) {
 
 	assert.Equal(t, []interface{}{}, arr)
 	assert.Equal(t, uint64(0), c.Size())
-}
-
-func TestPromoteUntilHead(t *testing.T) {
-	c := umi.New(&umi.Options{
-		PromoteRate: -1,
-	})
-
-	c.Set("1", 1)
-	c.Set("2", 2)
-	c.Set("3", 3)
-
-	c.Get("1")
-	c.Get("1")
-	c.Get("1")
-	c.Get("1")
-	c.Get("1")
-
-	arr := c.Values()
-	assert.Equal(t, []interface{}{1, 3, 2}, arr)
 }
 
 func TestSize(t *testing.T) {

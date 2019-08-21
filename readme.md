@@ -1,4 +1,4 @@
-# Umi 海
+# Umi
 
 [![Build Status](https://travis-ci.org/ysmood/umi.svg)](https://travis-ci.org/ysmood/umi)
 
@@ -20,9 +20,7 @@ not just the count of them.
 
 - [x] The algorithm used to replace cache is a variation of LRU.
 
-- [x] With a rate to throw away promotions.
-
-# Quick Start
+## Quick Start
 
 For more examples, see `umi_test.go`.
 
@@ -46,7 +44,7 @@ memorySize := c.Size()
 fmt.Println(v, memorySize)
 ```
 
-# FAQ
+## FAQ
 
 - Is the auto-calculated byte size of item safe?
 
@@ -54,22 +52,20 @@ fmt.Println(v, memorySize)
   golang, the safety is not guaranteed. So in case you have a more precise way to calculate
   the size, you can implement the `Sizable` interface of each item.
 
-
-# Benchmark
+## Benchmark
 
 `go test -bench . -benchmem`
 
-The `get` performance is 4x faster than the `https://github.com/hashicorp/golang-lru`.
-The `set` is a little slower. It's because Umi's data struct contains extra info
+The `get` performance is faster than the [golang-lru](https://github.com/hashicorp/golang-lru).
+The `set` is slower because Umi's data struct contains extra info
 to calculate such as TTL and byte size. This trade-off for more functionalities is acceptable.
 
 Umi's faster performance is because it uses two read-write locks for the
 internal `map` and `linked-list`, the more atomic lock time make the total lock time smaller.
-Besides, Umi doesn't promote on each `get` operation, it promotes by chance.
 
 How umi optimizes locks:
 
-```
+```txt
        umi: | ops1 | map-lock | ops2 | list-lock | ops3 |
 
 golang_lru: | -------------- write-lock --------------- |
@@ -77,15 +73,10 @@ golang_lru: | -------------- write-lock --------------- |
       time: ----------------------------------------------->
 ```
 
+```txt
+BenchmarkSet-6              	 3000000	       421 ns/op	     156 B/op	       2 allocs/op
+BenchmarkSet_golang_lru-6   	 5000000	       332 ns/op	     105 B/op	       4 allocs/op
+BenchmarkGet-6              	30000000	        41.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkGet_golang_lru-6   	20000000	        64.8 ns/op	      16 B/op	       1 allocs/op
+BenchmarkPeek-6             	100000000	        23.4 ns/op	       0 B/op	       0 allocs/op
 ```
-BenchmarkSet-8                   	 1000000	      1080 ns/op	     260 B/op	       4 allocs/op
-BenchmarkGet-8                   	30000000	        34.4 ns/op	       1 B/op	       0 allocs/op
-BenchmarkPeek-8                  	50000000	        26.8 ns/op	       1 B/op	       0 allocs/op
-BenchmarkGetRate0-8              	20000000	        66.4 ns/op	       3 B/op	       0 allocs/op
-BenchmarkGetRate10000-8          	50000000	        36.0 ns/op	       1 B/op	       0 allocs/op
-BenchmarkSet_golang_lru-8        	 2000000	       774 ns/op	     137 B/op	       4 allocs/op
-BenchmarkGet_golang_lru-8        	10000000	       158 ns/op	       7 B/op	       0 allocs/op
-BenchmarkParallel-8              	20000000	        76.8 ns/op	       0 B/op	       0 allocs/op
-BenchmarkParallel_golang_lru-8   	 5000000	       230 ns/op	       9 B/op	       0 allocs/op
-```
-

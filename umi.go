@@ -1,17 +1,12 @@
 package umi
 
 import (
-	"sync/atomic"
 	"time"
 )
 
 // Cache ...
 type Cache struct {
 	mem *memCache
-
-	promoteCountBase int32
-	promoteCount     int32
-
 	now int64
 }
 
@@ -20,8 +15,7 @@ func New(opts *Options) *Cache {
 	opts = defaultOptions(opts)
 
 	c := &Cache{
-		now:              time.Now().UnixNano(),
-		promoteCountBase: opts.PromoteRate,
+		now: time.Now().UnixNano(),
 		mem: &memCache{
 			list:    &memList{},
 			maxSize: uintptr(opts.MaxMemSize),
@@ -77,15 +71,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	item, has := c.mem.dict[key]
 
 	if has {
-		if c.promoteCountBase < 0 {
-			c.mem.list.promote(item, c.now)
-		} else if c.promoteCount == c.promoteCountBase {
-			c.mem.list.promote(item, c.now)
-			c.promoteCount = 0
-		} else {
-			atomic.AddInt32(&c.promoteCount, 1)
-		}
-
+		c.mem.list.promote(item, c.now)
 		c.mem.RUnlock()
 		return item.value, has
 	}
