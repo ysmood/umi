@@ -5,15 +5,13 @@ import (
 )
 
 type memCache struct {
-	sync.RWMutex
-
 	maxSize uintptr
 	size    uintptr
 
 	list *memList
 
 	// for fast read
-	dict map[string]*Item
+	dict *sync.Map
 }
 
 type memList struct {
@@ -112,10 +110,12 @@ func (list *memList) promote(item *Item, now int64) {
 }
 
 func (mem *memCache) set(key string, val interface{}, now int64) *Item {
-	item, has := mem.dict[key]
+	data, has := mem.dict.Load(key)
+	var item *Item
 
 	// if the content already exists, replace it with the new one
 	if has {
+		item = data.(*Item)
 		item.value = val
 		mem.size -= item.size
 		item.updateSize()
@@ -124,7 +124,7 @@ func (mem *memCache) set(key string, val interface{}, now int64) *Item {
 		item = newItem(key, val, now)
 
 		mem.list.add(item)
-		mem.dict[key] = item
+		mem.dict.Store(key, item)
 	}
 
 	mem.size += item.size
@@ -142,7 +142,7 @@ func (mem *memCache) del(item *Item) {
 		return
 	}
 
-	delete(mem.dict, item.key)
+	mem.dict.Delete(item.key)
 	mem.list.del(item)
 	mem.size -= item.size
 }
@@ -152,9 +152,10 @@ func (mem *memCache) delTail() {
 }
 
 func (mem *memCache) purge() {
-	for _, v := range mem.dict {
-		mem.del(v)
-	}
+	mem.dict.Range(func(_, v interface{}) bool {
+		mem.del(v.(*Item))
+		return true
+	})
 }
 
 // free multiple items until the freed size reaches the specified size

@@ -8,8 +8,6 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 	for {
 		time.Sleep(span)
 
-		c.mem.Lock()
-
 		for item, count := c.mem.list.tail, 0; item != nil && count < gcSize; count++ {
 			aliveable, ok := item.value.(Aliveable)
 			var alive bool
@@ -27,8 +25,6 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 
 			item = item.prev
 		}
-
-		c.mem.Unlock()
 
 		c.now = time.Now().UnixNano()
 	}

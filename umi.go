@@ -1,6 +1,7 @@
 package umi
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -25,7 +26,7 @@ func New(opts *Options) *Cache {
 		mem: &memCache{
 			list:    &memList{},
 			maxSize: uintptr(opts.MaxMemSize),
-			dict:    make(map[string]*Item),
+			dict:    &sync.Map{},
 		},
 	}
 
@@ -49,34 +50,30 @@ func (c *Cache) Count() int {
 // Set the val parameter could be `umi.IItem`, which will overwrite
 // the default behavior.
 func (c *Cache) Set(key string, val interface{}) *Item {
-	c.mem.Lock()
 	item := c.mem.set(key, val, c.now)
-	c.mem.Unlock()
 
 	return item
 }
 
 // Del ...
 func (c *Cache) Del(key string) {
-	c.mem.Lock()
-	c.mem.del(c.mem.dict[key])
-	c.mem.Unlock()
+	data, has := c.mem.dict.Load(key)
+	if has {
+		c.mem.del(data.(*Item))
+	}
 }
 
 // Purge ...
 func (c *Cache) Purge() {
-	c.mem.Lock()
 	c.mem.purge()
-	c.mem.Unlock()
 }
 
 // Get ...
 func (c *Cache) Get(key string) (interface{}, bool) {
-	c.mem.RLock()
-
-	item, has := c.mem.dict[key]
+	data, has := c.mem.dict.Load(key)
 
 	if has {
+		item := data.(*Item)
 		if c.promoteCountBase < 0 {
 			c.mem.list.promote(item, c.now)
 		} else if c.promoteCount == c.promoteCountBase {
@@ -86,26 +83,21 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 			atomic.AddInt32(&c.promoteCount, 1)
 		}
 
-		c.mem.RUnlock()
 		return item.value, has
 	}
 
-	c.mem.RUnlock()
 	return nil, has
 }
 
 // Peek it wont' affect the promotion
 func (c *Cache) Peek(key string) (interface{}, bool) {
-	c.mem.RLock()
-
-	item, has := c.mem.dict[key]
+	data, has := c.mem.dict.Load(key)
 
 	if has {
-		c.mem.RUnlock()
+		item := data.(*Item)
 		return item.value, has
 	}
 
-	c.mem.RUnlock()
 	return nil, has
 }
 
