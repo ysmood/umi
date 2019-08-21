@@ -1,4 +1,4 @@
-# Umi 海
+# Umi
 
 [![Build Status](https://travis-ci.org/ysmood/umi.svg)](https://travis-ci.org/ysmood/umi)
 
@@ -22,7 +22,7 @@ not just the count of them.
 
 - [x] With a rate to throw away promotions.
 
-# Quick Start
+## Quick Start
 
 For more examples, see `umi_test.go`.
 
@@ -46,7 +46,7 @@ memorySize := c.Size()
 fmt.Println(v, memorySize)
 ```
 
-# FAQ
+## FAQ
 
 - Is the auto-calculated byte size of item safe?
 
@@ -54,8 +54,7 @@ fmt.Println(v, memorySize)
   golang, the safety is not guaranteed. So in case you have a more precise way to calculate
   the size, you can implement the `Sizable` interface of each item.
 
-
-# Benchmark
+## Benchmark
 
 `go test -bench . -benchmem`
 
@@ -69,7 +68,7 @@ Besides, Umi doesn't promote on each `get` operation, it promotes by chance.
 
 How umi optimizes locks:
 
-```
+```txt
        umi: | ops1 | map-lock | ops2 | list-lock | ops3 |
 
 golang_lru: | -------------- write-lock --------------- |
@@ -77,7 +76,7 @@ golang_lru: | -------------- write-lock --------------- |
       time: ----------------------------------------------->
 ```
 
-```
+```txt
 BenchmarkSet-8                   	 1000000	      1080 ns/op	     260 B/op	       4 allocs/op
 BenchmarkGet-8                   	30000000	        34.4 ns/op	       1 B/op	       0 allocs/op
 BenchmarkPeek-8                  	50000000	        26.8 ns/op	       1 B/op	       0 allocs/op
@@ -88,4 +87,3 @@ BenchmarkGet_golang_lru-8        	10000000	       158 ns/op	       7 B/op	      
 BenchmarkParallel-8              	20000000	        76.8 ns/op	       0 B/op	       0 allocs/op
 BenchmarkParallel_golang_lru-8   	 5000000	       230 ns/op	       9 B/op	       0 allocs/op
 ```
-
