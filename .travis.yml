@@ -1,4 +1,11 @@
 language: go
 
 go:
-  - 1.8.x
+  - 1.12.x
+
+script:
+  - go get github.com/ysmood/kit/cmd/godev
+  - godev -l -m100
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

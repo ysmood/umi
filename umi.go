@@ -17,9 +17,10 @@ func New(opts *Options) *Cache {
 	c := &Cache{
 		now: time.Now().UnixNano(),
 		mem: &memCache{
-			list:    &memList{},
-			maxSize: uintptr(opts.MaxMemSize),
-			dict:    make(map[string]*Item),
+			list:      &memList{},
+			maxSize:   uintptr(opts.MaxMemSize),
+			dict:      make(map[string]*Item),
+			onEvicted: opts.OnEvicted,
 		},
 	}
 

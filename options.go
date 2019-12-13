@@ -17,6 +17,8 @@ type Options struct {
 
 	// default 1min
 	TTL time.Duration
+
+	OnEvicted func(*Item)
 }
 
 func defaultOptions(opts *Options) *Options {

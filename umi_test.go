@@ -38,11 +38,37 @@ func TestSet(t *testing.T) {
 func TestBasic(t *testing.T) {
 	c := umi.New(nil)
 
-	c.Set("a", int32(10))
+	item := c.Set("a", int32(10))
+	now := time.Now().UnixNano()
+	assert.True(t, item.Time() < now && item.Time() > now-int64(time.Second))
+	assert.Equal(t, 69, int(item.Size()))
 
 	v, _ := c.Get("a")
 
 	assert.Equal(t, 10, int(v.(int32)))
+}
+
+type testType struct {
+	size uintptr
+}
+
+func (t *testType) Size() uintptr {
+	return t.size
+}
+
+func (t *testType) Alive() bool {
+	return true
+}
+
+var _ umi.Sizable = &testType{}
+var _ umi.Aliveable = &testType{}
+
+func TestSizable(t *testing.T) {
+	c := umi.New(nil)
+
+	c.Set("a", &testType{1000})
+
+	assert.Equal(t, 1065, int(c.Size()))
 }
 
 func TestPeek(t *testing.T) {
@@ -53,6 +79,9 @@ func TestPeek(t *testing.T) {
 	v, _ := c.Peek("a")
 
 	assert.Equal(t, 10, int(v.(int32)))
+
+	_, has := c.Peek("b")
+	assert.False(t, has)
 }
 
 func TestDelHead(t *testing.T) {
@@ -67,6 +96,8 @@ func TestDelHead(t *testing.T) {
 	values := c.Values()
 
 	assert.Equal(t, []interface{}{2, 1}, values)
+	assert.Equal(t, 2, c.Count())
+	assert.Equal(t, []string{"b", "a"}, c.Keys())
 }
 
 func TestDelMiddle(t *testing.T) {
@@ -187,6 +218,46 @@ func TestOverflow(t *testing.T) {
 
 	assert.Equal(t, 73, int(c.Size()))
 	assert.Equal(t, []interface{}{4}, arr)
+}
+
+func TestOverflowNotSet(t *testing.T) {
+	c := umi.New(&umi.Options{
+		MaxMemSize: 200,
+	})
+
+	large := make([]byte, 200)
+
+	c.Set("1", 1)
+	res := c.Set("2", large)
+	assert.Nil(t, res)
+
+	c.Set("1", 1)
+	res = c.Set("1", large)
+	assert.Nil(t, res)
+
+	large = make([]byte, 100)
+
+	c.Set("1", 1)
+	c.Set("2", 1)
+	c.Set("1", large)
+	assert.Equal(t, 1, c.Count())
+
+	c.Set("1", 1)
+	c.Set("2", 1)
+	c.Set("3", large)
+	assert.Equal(t, 1, c.Count())
+}
+
+func TestOnEvicted(t *testing.T) {
+	c := umi.New(&umi.Options{
+		MaxMemSize: 100,
+		OnEvicted: func(item *umi.Item) {
+			assert.Equal(t, "1", item.Key())
+		},
+	})
+
+	c.Set("1", 1)
+	c.Set("2", 2)
 }
 
 func TestRace(t *testing.T) {

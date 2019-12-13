@@ -14,6 +14,8 @@ type memCache struct {
 
 	// for fast read
 	dict map[string]*Item
+
+	onEvicted func(*Item)
 }
 
 type memList struct {
@@ -116,22 +118,38 @@ func (mem *memCache) set(key string, val interface{}, now int64) *Item {
 
 	// if the content already exists, replace it with the new one
 	if has {
+		oldVal := item.value
+		oldSize := item.size
 		item.value = val
-		mem.size -= item.size
 		item.updateSize()
+
+		if item.size > mem.maxSize {
+			item.value = oldVal
+			item.size = oldSize
+			return nil
+		}
+
+		size := mem.size - oldSize + item.size
+		if size > mem.maxSize {
+			mem.free(size - mem.maxSize)
+		}
+		mem.size = mem.size - oldSize + item.size
 		mem.list.promote(item, now)
 	} else {
 		item = newItem(key, val, now)
 
-		mem.list.add(item)
-		mem.dict[key] = item
-	}
-
-	mem.size += item.size
-	if mem.size > mem.maxSize {
-		if !mem.free(mem.size - mem.maxSize) {
+		if item.size > mem.maxSize {
 			return nil
 		}
+
+		size := mem.size + item.size
+		if size > mem.maxSize {
+			mem.free(size - mem.maxSize)
+		}
+
+		mem.size += item.size
+		mem.list.add(item)
+		mem.dict[key] = item
 	}
 
 	return item
@@ -148,7 +166,11 @@ func (mem *memCache) del(item *Item) {
 }
 
 func (mem *memCache) delTail() {
-	mem.del(mem.list.tail)
+	tail := mem.list.tail
+	mem.del(tail)
+	if mem.onEvicted != nil {
+		mem.onEvicted(tail)
+	}
 }
 
 func (mem *memCache) purge() {
@@ -158,17 +180,11 @@ func (mem *memCache) purge() {
 }
 
 // free multiple items until the freed size reaches the specified size
-func (mem *memCache) free(size uintptr) bool {
+func (mem *memCache) free(size uintptr) {
 	var freedSize uintptr
 
 	for freedSize < size {
-		if mem.list.tail == nil {
-			// if after all items are freed, the space is still not enough
-			return false
-		}
 		freedSize += mem.list.tail.size
 		mem.delTail()
 	}
-
-	return true
 }
