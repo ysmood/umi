@@ -2,6 +2,7 @@
 
 [![GoDoc](https://godoc.org/github.com/ysmood/umi?status.svg)](http://godoc.org/github.com/ysmood/umi)
 [![Build Status](https://travis-ci.org/ysmood/umi.svg)](https://travis-ci.org/ysmood/umi)
+[![codecov](https://codecov.io/gh/ysmood/umi/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/umi)
 
 Umi is a high performance LRU cache lib.
 
