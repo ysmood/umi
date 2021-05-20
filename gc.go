@@ -28,8 +28,8 @@ func (c *Cache) gcWorker(span time.Duration, gcSize int, ttl time.Duration) {
 			item = item.prev
 		}
 
-		c.mem.Unlock()
-
 		c.now = time.Now().UnixNano()
+
+		c.mem.Unlock()
 	}
 }

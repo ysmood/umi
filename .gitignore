@@ -1,3 +1,3 @@
 *.log
 *.db
-coverage.txt
+*.out

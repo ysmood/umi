@@ -73,8 +73,9 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 
 	if has {
 		c.mem.list.promote(item, c.now)
+		v := item.value
 		c.mem.RUnlock()
-		return item.value, has
+		return v, has
 	}
 
 	c.mem.RUnlock()
